@@ -3,20 +3,22 @@ import Note from './components/Note'
 import Notification from './components/Notification'
 import Footer from './components/Footer'
 import Togglable from './components/Togglable'
-import LoginForm from './components/LoginForm'
 import NoteForm from './components/NoteForm'
 import noteService from './services/notes'
-import loginService from './services/login'
+import Users from './components/Users'
 
 const App = () => {
   const [notes, setNotes] = useState([])
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  const [loginVisible, setLoginVisible] = useState(false)
+  // const [username, setUsername] = useState('') 
+  // const [password, setPassword] = useState('')
+  // const [user, setUser] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // const [loginVisible, setLoginVisible] = useState(false)
   const noteFormRef = useRef()
+
+  console.log(isLoggedIn)
 
   useEffect(() => {
     noteService
@@ -26,14 +28,14 @@ const App = () => {
       })
   }, [])
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      noteService.setToken(user.token)
-    }
-  }, [])
+  // useEffect(() => {
+  //   const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+  //   if (loggedUserJSON) {
+  //     const user = JSON.parse(loggedUserJSON)
+  //     setUser(user)
+  //     noteService.setToken(user.token)
+  //   }
+  // }, [])
 
   const toggleImportanceOf = id => {
     const note = notes.find(n => n.id === id)
@@ -62,51 +64,6 @@ const App = () => {
         setNotes(notes.concat(returnedNote))
       })
   }
-  
-  const handleLogin = async (event) => {
-    event.preventDefault()
-    try {
-      const user = await loginService.login({
-        username, password,
-      })
-
-      window.localStorage.setItem(
-        'loggedNoteappUser', JSON.stringify(user)
-      ) 
-      noteService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
-  }
-
-  const loginForm = () => {
-    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-    const showWhenVisible = { display: loginVisible ? '' : 'none' }
-
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>log in</button>
-        </div>
-        <div style={showWhenVisible}>
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
-          <button onClick={() => setLoginVisible(false)}>cancel</button>
-        </div>
-      </div>
-    )
-  }
 
   const noteForm = () => (
   <Togglable buttonLabel="new note" ref={noteFormRef}>
@@ -123,13 +80,14 @@ const App = () => {
       <h1>Notes</h1>
 
       <Notification message={errorMessage} />
+      <Users 
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+        errorMessage={errorMessage}
+        setErrorMessage={setErrorMessage}
+      />
 
-      {!user && loginForm()} 
-      {user && <div>
-        <p>{user.name} logged in</p>
-          {noteForm()}
-        </div>
-      }
+      {isLoggedIn ? noteForm() : null}
 
       <div>
         <button onClick={() => setShowAll(!showAll)}>
