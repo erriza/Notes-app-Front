@@ -74,7 +74,6 @@ export default function Users({ isLoggedIn, setIsLoggedIn, errorMessage, setErro
         {!user && loginForm()} 
         {user && <div>
             <p>{user.name} logged in</p>
-            {/* {noteForm()} */}
             </div>
         }
         </>
