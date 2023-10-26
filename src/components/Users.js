@@ -71,7 +71,6 @@ export default function Users({ isLoggedIn, setIsLoggedIn, errorMessage, setErro
 
       return (
         <>
-        <h2>users components</h2>
         {!user && loginForm()} 
         {user && <div>
             <p>{user.name} logged in</p>
